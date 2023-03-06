@@ -6,7 +6,9 @@ find_package(GTest REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(ring_buffer_test test.cpp ring_buffer.hpp)
+add_executable(ring_buffer_test test.cpp)
+
+target_include_directories(ring_buffer_test PRIVATE include)
 
 target_link_libraries(ring_buffer_test GTest::gtest_main)
 

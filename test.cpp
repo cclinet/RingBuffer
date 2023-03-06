@@ -3,12 +3,13 @@
 
 // Demonstrate some basic assertions.
 TEST(RingBuffer, BasicAssertions) {
-  auto ring_buffer = RingBuffer<int, 16>();
-  ring_buffer.push({1, 2});
+    auto ring_buffer = RingBuffer<int, 9>();
+    EXPECT_EQ(ring_buffer.get_size(), 16);
+    ring_buffer.push({1, 2});
 
-  int v;
-  ring_buffer.pop(&v);
-  EXPECT_EQ(v, 1);
+    int v;
     ring_buffer.pop(&v);
-  EXPECT_EQ(v, 2);
+    EXPECT_EQ(v, 1);
+    ring_buffer.pop(&v);
+    EXPECT_EQ(v, 2);
 }
