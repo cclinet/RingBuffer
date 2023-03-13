@@ -18,40 +18,17 @@ public:
     using reference = T &;
     using const_reference = const T &;
 
+
 public:
     RingBuffer() : front_index(0), end_index(0) {
     }
 
     ~RingBuffer() = default;
-    // RingBuffer(const RingBuffer &) = delete;
-    // RingBuffer &operator=(const RingBuffer &) = delete;
 
-    // RingBuffer(RingBuffer &&other) : out_(other.out_), in_(other.in_), data_(std::move(other.data_)) {}
-    // RingBuffer &operator=(RingBuffer &&other)
-    // {
-    //     *this = std::move(other);
-    // }
 
 public:
-    reference front() {
-        return data_[front_index];
-    }
-
-    const_reference front() const {
-        return data_[front_index];
-    }
-
-    reference back() {
-        return data_[front_index];
-    }
-
-    const_reference back() const {
-        return data_[front_index];
-    }
-
-public:
-    [[nodiscard]] bool empty() const {
-        return front()>back();
+    bool empty() const {
+        return end_index >= front_index;
     }
 
     size_type size() const {
@@ -59,17 +36,19 @@ public:
     }
 
 public:
-    void push( const value_type& value );
-    void push( value_type&& value );
+    size_type in(T *buf, size_type n = 1) {
+        std::copy(buf, buf + n, data_.begin() + front_index);
+//        std::memmove(data_.begin()+front_index, buf, n);
+        front_index += n;
+        return n;
+    }
 
-    template< class... Args >
-    decltype(auto) emplace( Args&&... args );
-
-    void pop();
-
-public:
-
-
+    size_type out(T *buf, size_type n = 1) {
+        std::memmove(buf, data_.begin()+end_index, n);
+        std::cout<<*buf<<' '<<*(data_.begin()+end_index)<<'\n';
+        end_index += n;
+        return n;
+    }
 
 //    inline std::size_t unused() const {
 //        return N - (in_ - out_);
@@ -117,6 +96,4 @@ private:
     size_type front_index;
     size_type end_index;
     std::array<T, find_capacity()> data_;
-    const size_type mask_ = data_.size() - 1;
-
 };
