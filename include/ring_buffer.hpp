@@ -15,9 +15,6 @@ class RingBuffer {
 public:
     using value_type = T;
     using size_type = std::size_t;
-    using reference = T &;
-    using const_reference = const T &;
-
 
 public:
     RingBuffer() : front_index(0), end_index(0) {
@@ -35,24 +32,33 @@ public:
         return data_.size();
     }
 
+    size_type unused() const {
+        return data_.size() - (front_index - end_index);
+    }
+
 public:
     size_type in(T *buf, size_type n = 1) {
-        std::copy(buf, buf + n, data_.begin() + front_index);
-//        std::memmove(data_.begin()+front_index, buf, n);
+        if (unused() < n) {
+            return 0;
+        }
+
+        size_type off = front_index & (data_.size() - 1);
+        size_type l = std::min(n, data_.size() - off);
+
+        std::copy(buf, buf + l, data_.begin() + front_index);
+        std::copy(buf + l, buf + n, data_.begin());
+//        std::copy(buf, buf + n, data_.begin() + front_index);
         front_index += n;
         return n;
     }
 
     size_type out(T *buf, size_type n = 1) {
-        std::memmove(buf, data_.begin()+end_index, n);
-        std::cout<<*buf<<' '<<*(data_.begin()+end_index)<<'\n';
+        std::copy(data_.begin() + end_index, data_.begin() + end_index + n, buf);
         end_index += n;
         return n;
     }
 
-//    inline std::size_t unused() const {
-//        return N - (in_ - out_);
-//    }
+
 //
 //    inline bool push(std::initializer_list<T> buf) {
 //        if (unused() < buf.size()) {
